@@ -1,0 +1,8 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+body { @apply bg-white text-slate-800 antialiased; }
+@layer components {
+  .campo { @apply w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm focus:border-marca focus:outline-none; }
+  .botao { @apply inline-flex items-center justify-center gap-2 rounded bg-marca px-4 py-2 text-sm font-medium text-white hover:bg-marca-escura disabled:opacity-50; }
+  .botao-claro { @apply inline-flex items-center justify-center gap-2 rounded border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-50; }
+  .rotulo { @apply mb-1 block text-xs font-medium text-slate-600; }
+}
