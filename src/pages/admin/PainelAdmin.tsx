@@ -1,3 +1,5 @@
+import { modoDemonstracao } from '../../lib/modoDemonstracao'
+import { restaurarDemonstracao } from '../../lib/dadosDemonstracao'
 import { useEffect, useState } from 'react'
 import { BarChart3, Boxes, LogOut, Package, ReceiptText, Smartphone, Tags } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -19,16 +21,18 @@ const abas = [
 
 // /admin: só entra quem fez login E está na tabela "admins"
 export default function PainelAdmin() {
-  const [estado, setEstado] = useState<'carregando' | 'sair' | 'negado' | 'ok'>('carregando')
+  const [estado, setEstado] = useState<'carregando' | 'sair' | 'negado' | 'ok'>(modoDemonstracao ? 'ok' : 'carregando')
   const [aba, setAba] = useState('dashboard')
 
   async function verificar() {
+    if (modoDemonstracao) return setEstado('ok')
     const { data } = await supabase.auth.getSession()
     if (!data.session) return setEstado('sair')
     const { data: admin } = await supabase.rpc('is_admin')
     setEstado(admin ? 'ok' : 'negado')
   }
   useEffect(() => {
+    if (modoDemonstracao) return
     verificar()
     const { data } = supabase.auth.onAuthStateChange(() => { verificar() })
     return () => data.subscription.unsubscribe()
@@ -49,12 +53,13 @@ export default function PainelAdmin() {
               <a.icone size={16} /> {a.nome}
             </button>
           ))}
-          <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-2 whitespace-nowrap rounded px-3 py-2 text-sm hover:bg-slate-100 md:mt-4">
+          <button onClick={() => modoDemonstracao ? window.location.assign('/') : supabase.auth.signOut()} className="flex items-center gap-2 whitespace-nowrap rounded px-3 py-2 text-sm hover:bg-slate-100 md:mt-4">
             <LogOut size={16} /> Sair
           </button>
         </nav>
       </aside>
       <main className="flex-1 p-4 sm:p-6">
+        {modoDemonstracao && <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"><span><b>Modo demonstração:</b> dados fictícios salvos somente neste navegador.</span><button className="botao-claro" onClick={() => { if (confirm('Restaurar dados de exemplo? Suas alterações de demonstração serão perdidas.')) { restaurarDemonstracao(); window.location.reload() } }}>Restaurar dados de exemplo</button></div>}
         {aba === 'dashboard' && <AdminDashboard />}
         {aba === 'produtos' && <AdminProdutos />}
         {aba === 'categorias' && <AdminCadastros tipo="categorias" />}
